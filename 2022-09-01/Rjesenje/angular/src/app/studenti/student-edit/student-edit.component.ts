@@ -1,7 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import { MojConfig } from '../../moj-config';
 import {HttpClient} from "@angular/common/http";
-import {ActivatedRoute} from "@angular/router";
 
 declare function porukaSuccess(s: string): any;
 
@@ -11,25 +10,26 @@ declare function porukaSuccess(s: string): any;
   styleUrls: ['./student-edit.component.css'],
 })
 export class StudentEditComponent implements OnInit {
-  opstine: any = [];
-  @Input() urediStudent:any;
-  constructor(private httpClient: HttpClient, private router: ActivatedRoute) {}
+
+  @Output() ucitaj = new EventEmitter<void>();
+  @Input() urediStudent : any;
+  opstine: any;
+
+  constructor(private httpKlijent : HttpClient) {}
   ngOnInit(): void {
-    this.loadOpstine();
+    this.getOpstine();
   }
 
-  loadOpstine(){
-    return this.httpClient.get(MojConfig.adresa_servera + "/Opstina/GetByAll", MojConfig.http_opcije())
-      .subscribe((res:any) => {
-        this.opstine = res;
-      })
+  Spasi() {
+    this.httpKlijent.post(MojConfig.adresa_servera+"/Student/Snimi/",this.urediStudent,MojConfig.http_opcije()).subscribe((x:any)=>{
+        this.urediStudent=null;
+        this.ucitaj.emit();
+    },(err)=>porukaSuccess(err.error));
   }
 
-  spasiPromjene(){
-    this.httpClient.post(MojConfig.adresa_servera + "/Student/Update/" + this.urediStudent.id, this.urediStudent, MojConfig.http_opcije())
-      .subscribe((res:any) => {
-        porukaSuccess(`Izmjene uspjesno spasene!`);
-        this.urediStudent.prikazi=false;
-      })
+  getOpstine() {
+    this.httpKlijent.get(MojConfig.adresa_servera+"/Opstina/GetByAll/",MojConfig.http_opcije()).subscribe((x:any)=>{
+      this.opstine=x;
+    },(err)=>porukaSuccess(err.error));
   }
 }

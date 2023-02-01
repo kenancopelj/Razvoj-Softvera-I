@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using FIT_Api_Examples.Data;
 using FIT_Api_Examples.Helper;
 using FIT_Api_Examples.Helper.AutentifikacijaAutorizacija;
@@ -35,58 +36,6 @@ namespace FIT_Api_Examples.Modul2.Controllers
             return Ok(_dbContext.Student.Include(s => s.opstina_rodjenja.drzava).FirstOrDefault(s => s.id == id)); ;
         }
 
-        [HttpPost ("{id}")]
-        public ActionResult Update(int id, [FromBody] StudentUpdateVM x)
-        {
-            //if (!HttpContext.GetLoginInfo().isLogiran)
-            //    return BadRequest("Niste logirani.");
-
-            Student student;
-
-            if(id == 0)
-            {
-                student = new Student()
-                {
-                    slika_korisnika = Config.SlikeURL + "empty.png",
-                    created_time = DateTime.Now
-                };
-                _dbContext.Add(student);
-            }
-            else
-            {
-                student = _dbContext.Student.Find(id);
-                if (student == null)
-                    return BadRequest("Ne postoji student sa ovim IDom!");
-            }
-
-            student.ime = x.ime.RemoveTags();
-            student.prezime = x.prezime.RemoveTags();
-            student.broj_indeksa = x.broj_indeksa;
-            student.datum_rodjenja = x.datum_rodjenja;
-            student.opstina_rodjenja_id = x.opstina_rodjenja_id;
-
-            _dbContext.SaveChanges();
-
-            return Ok(student);
-        }
-
-        [HttpPost ("{id}")]
-        public ActionResult Delete (int id)
-        {
-            //if (!HttpContext.GetLoginInfo().isLogiran)
-            //    return BadRequest("Niste logirani.");
-
-            Student student = _dbContext.Student.Find(id);
-
-            if (student == null || id == 1)
-                return BadRequest("Pogrešan ID");
-
-            _dbContext.Remove(student);
-            _dbContext.SaveChanges();
-
-            return Ok();
-        }
-
         [HttpGet]
         public ActionResult<List<Student>> GetAll(string ime_prezime)
         {
@@ -96,6 +45,40 @@ namespace FIT_Api_Examples.Modul2.Controllers
                 .OrderByDescending(s => s.id)
                 .AsQueryable();
             return data.Take(100).ToList();
+        }
+        [HttpPost]
+        public ActionResult Snimi([FromBody] StudentAddVM x)
+        {
+            if (!HttpContext.GetLoginInfo().isLogiran)
+                return Forbid();
+            Student student;
+            if (x.id == 0)
+            {
+                student = new Student();
+                student.created_time = DateTime.Now;
+                _dbContext.Student.Add(student);
+            }
+            else
+                student = _dbContext.Student.Find(x.id);
+
+            student.ime = x.ime;
+            student.prezime = x.prezime;
+            student.broj_indeksa = x.broj_indeksa;
+            student.opstina_rodjenja_id = x.opstina_rodjenja_id;
+            student.datum_rodjenja = x.datum_rodjenja;
+
+            _dbContext.SaveChanges();
+
+            return Ok(student);
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
+        {
+            var student = _dbContext.Student.Find(id);
+            _dbContext.Remove(student);
+            _dbContext.SaveChanges();
+            return Ok();
         }
 
     }

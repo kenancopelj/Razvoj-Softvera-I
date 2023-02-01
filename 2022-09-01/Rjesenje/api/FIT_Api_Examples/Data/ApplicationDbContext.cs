@@ -19,9 +19,9 @@ namespace FIT_Api_Examples.Data
         public DbSet<AutentifikacijaToken> AutentifikacijaToken{ get; set; }
         public DbSet<Nastavnik> Nastavnik{ get; set; }
         public DbSet<KorisnickiNalog> KorisnickiNalog{ get; set; }
-        public DbSet<UpisUAkGodinu> UpisUAkGodinu { get; set; }
         public DbSet<Obavijest> Obavijest{ get; set; }
         public DbSet<AkademskaGodina> AkademskaGodina { get; set; }
+        public DbSet<UpisGodine> UpisGodine { get; set; }
 
         public ApplicationDbContext(
             DbContextOptions options) : base(options)

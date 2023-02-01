@@ -14,13 +14,11 @@ export class StudentiComponent implements OnInit {
   title: string = 'angularFIT2';
   filter_imeprezime: string = '';
   filter_opstina: string = '';
-  check_imeprezime: boolean;
-  check_opstina: boolean;
   studentPodaci: any;
+  checked_opstina: boolean;
+  checked_imeprezime: boolean;
   odabraniStudent: any = null;
-
-  constructor(private httpKlijent: HttpClient, private router: Router) {
-  }
+  constructor(private httpKlijent: HttpClient, private router: Router) {}
 
   testirajWebApi(): void {
     this.httpKlijent
@@ -37,48 +35,37 @@ export class StudentiComponent implements OnInit {
     this.testirajWebApi();
   }
 
-  filter() {
-    if (this.check_imeprezime) {
-      return this.studentPodaci?.filter((student: any) => `${student.ime} ${student.prezime} || ${student.prezime} ${student.ime}`.toLowerCase().includes(this.filter_imeprezime.toLowerCase()));
-    }
-    if (this.check_opstina) {
-      return this.studentPodaci?.filter((student: any) => `${student.opstina_rodjenja.description}`.toLowerCase().includes(this.filter_opstina.toLowerCase()));
-    }
-    return this.studentPodaci = null ? [] : this.studentPodaci;
+  GetPodaci(){
+      if(this.studentPodaci==null)
+        return [];
+
+      return this.studentPodaci.filter((x:any)=>
+        (!this.checked_imeprezime || ((x.ime.toLowerCase() + " " + x.prezime.toLowerCase()).startsWith(this.filter_imeprezime))
+          ||(x.ime.toLowerCase() + " " + x.prezime.toLowerCase()).startsWith(this.filter_imeprezime))
+      && (!this.checked_opstina || x.opstina_rodjenja.description.toLowerCase().startsWith(this.filter_opstina)))
   }
 
-  obrisiStudent(student: any) {
-    this.httpKlijent.post(MojConfig.adresa_servera + "/Student/Delete/" + student.id, null, MojConfig.http_opcije())
-      .subscribe((res: any) => {
-        let index = this.studentPodaci.indexOf(student);
-        if (index > -1) {
-          this.studentPodaci.splice(student, 1);
-          this.testirajWebApi();
-        }
-      })
-    porukaSuccess(`Student uspješno obrisan`)
+  Uredi(s: any) {
+    this.odabraniStudent=s;
   }
 
-  dodajStudent(){
-    this.odabraniStudent = {
-      prikazi: true,
-      id: 0,
-      ime: this.filter_imeprezime.slice(0,1).toUpperCase() + this.filter_imeprezime.slice(1,).toLowerCase(),
-      prezime: "",
-      datum_rodjenja: new Date(),
-      broj_indeksa: "",
-      opstina_rodjenja_id: 2,
-      name: "Dodaj student"
+  Obrisi(s: any) {
+    this.httpKlijent.delete(MojConfig.adresa_servera+"/Student/Delete/"+s.id,MojConfig.http_opcije()).subscribe((x:any)=>{
+      this.testirajWebApi();
+    });
+  }
+
+  napraviNovi() {
+    this.odabraniStudent={
+      id:0,
+      ime:this.filter_imeprezime.slice(0,1).toUpperCase() + this.filter_imeprezime.slice(1,).toLowerCase(),
+      prezime:"",
+      broj_indeksa:"",
+      opstina_rodjenja_id:2,
     }
   }
 
-  urediStudent(student: any){
-    this.odabraniStudent = student;
-    this.odabraniStudent.name = "Edit student";
-    this.odabraniStudent.prikazi = true;
-  }
-
-  maticnaKnjiga(student:any){
-    this.router.navigate(["student-maticnaknjiga", student.id]);
+  maticnaKnijga(s: any) {
+    this.router.navigate(['/student-maticnaknjiga/',s.id]);
   }
 }

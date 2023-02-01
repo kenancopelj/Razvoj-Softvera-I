@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {ActivatedRoute} from "@angular/router";
 import {MojConfig} from "../moj-config";
@@ -12,59 +12,87 @@ declare function porukaError(a: string): any;
   styleUrls: ['./student-maticnaknjiga.component.css'],
 })
 export class StudentMaticnaknjigaComponent implements OnInit {
-  maticnaKnjiga: any;
-  id: number;
-  sub: any;
-  godine: any;
-  semestar: any = null;
+  studentId: any;
+  odabraniStudent: any = [];
 
-  constructor(private httpClient: HttpClient, private router: ActivatedRoute) {}
+  noviUpis : any = null;
+  podaciUpis: any=[];
+  podaciAkademskeGodine: any;
+  ovjera: boolean = false;
+  odabraniOvjera: any = null;
+
+
+  constructor(private httpKlijent : HttpClient, private route : ActivatedRoute) {}
 
   ngOnInit() {
-    this.loadGodine();
-    this.sub = this.router.params.subscribe((res:any) => {
-      this.id = +res["id"];
-      this.loadMaticna();
-    })
+    this.route.params.subscribe((x:any)=>{
+      this.studentId = +x['id'];
+    });
+    console.log(this.studentId);
+    this.fetchStudent();
+    this.fetchUpise();
+    this.fetchAkademske();
   }
 
-  loadMaticna(){
-    this.httpClient.get(MojConfig.adresa_servera + "/MaticnaKnjiga/GetMaticna?id=" + this.id, MojConfig.http_opcije())
-      .subscribe((res:any) => {
-        this.maticnaKnjiga = res;
-      })
+  ovjeriLjetni() {}
+
+  upisLjetni() {}
+
+  ovjeriZimski(x: any) {
+    this.odabraniOvjera=x;
   }
 
-  loadGodine(){
-    this.httpClient.get(MojConfig.adresa_servera + "/MaticnaKnjiga/GetGodine", MojConfig.http_opcije())
-      .subscribe((res:any) => {
-        this.godine = res;
-      })
+   fetchStudent() {
+    this.httpKlijent.get(MojConfig.adresa_servera+"/Student/Get/"+this.studentId,MojConfig.http_opcije()).subscribe((x:any)=>{
+      this.odabraniStudent = x;
+    },(err)=>porukaError(err.error));
   }
 
-  zimskiSemestar(){
-    this.semestar = {
-      id: this.id,
-      datum: new Date(),
-      godinaStudija: 1,
-      akGodina: 1,
-      cijenaSkolarine: 0,
-      obnova: false
+  NapraviNovi() {
+    this.noviUpis={
+      godinaStudija:1,
+      akademska_godina_id:1,
+      DatumUpisZimski : new Date(),
+      cijenaSkolarine:0,
+      obnova:false,
+      student_id:this.studentId
     }
   }
 
-  upisiZimski(){
-    this.httpClient.post(MojConfig.adresa_servera + "/MaticnaKnjiga/UpisiZimski/" + this.id, this.semestar, MojConfig.http_opcije())
-      .subscribe((res:any) => {
-        porukaSuccess(`Uspjesno upisan zimski semestar`);
-        this.semestar=null;
-      })
+  Upisi() {
+    this.httpKlijent.post(MojConfig.adresa_servera+"/UpisGodine/Add",this.noviUpis,MojConfig.http_opcije()).subscribe((x:any)=>{
+      this.noviUpis=null;
+      this.fetchUpise();
+    },(err)=>porukaError(err.error));
   }
 
-  ovjeriZimski(id: any) {
-    this.httpClient.post(MojConfig.adresa_servera + "/MaticnaKnjiga/OvjeriZimski/" + id, MojConfig.http_opcije())
-      .subscribe((res:any) => {
-        porukaSuccess(`Uspjesno ovjeren zimski semestar`);
-      })
+   fetchUpise() {
+     this.httpKlijent.get(MojConfig.adresa_servera+"/UpisGodine/GetAll/"+this.studentId,MojConfig.http_opcije()).subscribe((x:any)=>{
+       this.podaciUpis = x;
+     },(err)=>porukaError(err.error));
+  }
+
+   fetchAkademske() {
+     this.httpKlijent.get(MojConfig.adresa_servera+"/AkademskeGodine/GetAll_ForCmb/",MojConfig.http_opcije()).subscribe((x:any)=>{
+       this.podaciAkademskeGodine = x;
+     },(err)=>porukaError(err.error));
+  }
+
+  Ovjeri() {
+    this.httpKlijent.put(MojConfig.adresa_servera+"/UpisGodine/Update/",this.odabraniOvjera,MojConfig.http_opcije()).subscribe((x:any)=>{
+      this.odabraniOvjera=null;
+      this.fetchUpise();
+    },(err)=>porukaError(err.error));
   }
 }
+
+/*public int id { get; set; }
+public int godinaStudija { get; set; }
+public int akademska_godina_id { get; set; }
+public DateTime DatumUpisZimski { get; set; }
+public float cijenaSkolarine { get; set; }
+public bool obnova { get; set; }
+public DateTime? datumOvjereZimski { get; set; }
+public string? napomena { get; set; }
+public int student_id { get; set; }
+public int evidentirao_korisnik_id { get; set; }*/
