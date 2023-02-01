@@ -27,6 +27,7 @@ namespace FIT_Api_Examples.Modul2.Controllers
             this._dbContext = dbContext;
         }
 
+        [Autorizacija(studentskaSluzba:true,prodekan:true,dekan:true,studenti:false,nastavnici:true)]
         [HttpGet("{id}")]
         public ActionResult Get(int id)
         {
@@ -35,10 +36,14 @@ namespace FIT_Api_Examples.Modul2.Controllers
 
             return Ok(_dbContext.Student.Include(s => s.opstina_rodjenja.drzava).FirstOrDefault(s => s.id == id)); ;
         }
-
+        [Autorizacija(studentskaSluzba: true, prodekan: true, dekan: true, studenti: false, nastavnici: true)]
         [HttpGet]
         public ActionResult<List<Student>> GetAll(string ime_prezime)
         {
+            if (!HttpContext.GetLoginInfo().isLogiran)
+                return Forbid("Nije logiran!");
+
+
             var data = _dbContext.Student
                 .Include(s => s.opstina_rodjenja.drzava)
                 .Where(x => ime_prezime == null || (x.ime + " " + x.prezime).StartsWith(ime_prezime) || (x.prezime + " " + x.ime).StartsWith(ime_prezime))
@@ -46,11 +51,13 @@ namespace FIT_Api_Examples.Modul2.Controllers
                 .AsQueryable();
             return data.Take(100).ToList();
         }
+        [Autorizacija(studentskaSluzba: true, prodekan: true, dekan: true, studenti: false, nastavnici: true)]
         [HttpPost]
         public ActionResult Snimi([FromBody] StudentAddVM x)
         {
             if (!HttpContext.GetLoginInfo().isLogiran)
-                return Forbid();
+                return Forbid("Nije logiran!");
+            
             Student student;
             if (x.id == 0)
             {
@@ -71,10 +78,13 @@ namespace FIT_Api_Examples.Modul2.Controllers
 
             return Ok(student);
         }
-
+        [Autorizacija(studentskaSluzba: true, prodekan: true, dekan: true, studenti: false, nastavnici: true)]
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
+            if (!HttpContext.GetLoginInfo().isLogiran)
+                return Forbid("Nije logiran!");
+
             var student = _dbContext.Student.Find(id);
             _dbContext.Remove(student);
             _dbContext.SaveChanges();

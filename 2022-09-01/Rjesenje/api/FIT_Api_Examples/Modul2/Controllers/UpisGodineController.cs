@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using System.Net.Http;
 
 namespace FIT_Api_Examples.Modul2.Controllers
 {
@@ -18,10 +19,14 @@ namespace FIT_Api_Examples.Modul2.Controllers
         {
             this._dbContext = dbContext;
         }
-
+        [Autorizacija(studentskaSluzba: true, prodekan: true, dekan: true, studenti: false, nastavnici: true)]
         [HttpPost]
         public ActionResult Add([FromBody] UpisGodineVM x)
         {
+            if (!HttpContext.GetLoginInfo().isLogiran)
+                return Forbid("Nije logiran!");
+
+
             var noviUpis = new UpisGodine
             {
                 akademska_godina_id = x.akademska_godina_id,
@@ -43,11 +48,14 @@ namespace FIT_Api_Examples.Modul2.Controllers
         }
 
 
-
+        [Autorizacija(studentskaSluzba: true, prodekan: true, dekan: true, studenti: false, nastavnici: true)]
         [HttpGet("{id}")]
         public ActionResult GetAll(int id)
         {
-                var student = _dbContext.Student.Where(x => x.id == id).FirstOrDefault();
+            if (!HttpContext.GetLoginInfo().isLogiran)
+                return Forbid("Nije logiran!");
+
+            var student = _dbContext.Student.Where(x => x.id == id).FirstOrDefault();
                 var upisaneGodine = _dbContext.UpisGodine.Where(x => x.student_id == id)
                 .Select(u => new
                 {
@@ -71,10 +79,13 @@ namespace FIT_Api_Examples.Modul2.Controllers
         }
 
 
-
+        [Autorizacija(studentskaSluzba: true, prodekan: true, dekan: true, studenti: false, nastavnici: true)]
         [HttpPut]
         public ActionResult Update([FromBody] UpisGodineUpdateVM x)
         {
+            if (!HttpContext.GetLoginInfo().isLogiran)
+                return Forbid("Nije logiran!");
+
             var upis = _dbContext.UpisGodine.Find(x.id);
             upis.datumOvjereZimski = x.datumOvjereZimski;
             upis.napomena = x.napomena;
