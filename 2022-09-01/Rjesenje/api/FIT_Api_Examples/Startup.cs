@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using FIT_Api_Examples.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using FIT_Api_Examples.Helper.AutentifikacijaAutorizacija;
 
 namespace FIT_Api_Examples
 {
@@ -35,7 +36,10 @@ namespace FIT_Api_Examples
             services.AddControllers();
 
             // Register the Swagger generator, defining 1 or more Swagger documents
-            services.AddSwaggerGen();
+            services.AddSwaggerGen(c =>
+            {
+                c.OperationFilter<AutorizacijaSwaggerHeader>();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
