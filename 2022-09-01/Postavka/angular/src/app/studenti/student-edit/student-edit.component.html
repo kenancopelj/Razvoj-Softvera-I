@@ -1,0 +1,46 @@
+<div
+  class="modal fade show"
+  id="exampleModalLive"
+  tabindex="-1"
+  aria-labelledby="exampleModalLiveLabel"
+  aria-modal="true"
+  role="dialog"
+  style="display: block"
+  *ngIf="this.urediStudent != null"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLiveLabel">Novi semestar za {{this.urediStudent.ime }}</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="urediStudent=null"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Ime</label>
+          <input [(ngModel)]="urediStudent.ime" class="form-control" type="text" placeholder="ime" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Prezime</label>
+          <input [(ngModel)]="urediStudent.prezime" class="form-control" placeholder="prezime" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Broj indeksa</label>
+          <input [(ngModel)]="urediStudent.broj_indeksa" class="form-control" placeholder="indeks" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Opstina rodjenja</label>
+          <select [(ngModel)]="urediStudent.opstina_rodjenja_id" class="form-control" placeholder="opstina">
+            <option *ngFor="let x of opstine" [value]="x.id">{{x.opis}}</option>
+          </select>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="this.urediStudent=null">Close</button>
+        <button type="button" class="btn btn-primary" (click)="Spasi()">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>

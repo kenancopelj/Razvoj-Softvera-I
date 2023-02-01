@@ -1,0 +1,164 @@
+<p>student-maticnaknjiga works!</p>
+
+<div>
+  <div class="mb-3 row">
+    <label class="col-sm-2 col-form-label">Student ID</label>
+    <div class="col-sm-4">
+      <input [value]="this.studentId" disabled class="form-control" />
+    </div>
+  </div>
+
+  <div class="mb-3 row">
+    <label class="col-sm-2 col-form-label">Student ime</label>
+    <div class="col-sm-4">
+      <input [value]="this.odabraniStudent.ime" disabled class="form-control" />
+    </div>
+  </div>
+
+  <div class="mb-3 row">
+    <label class="col-sm-2 col-form-label">Student prezime</label>
+    <div class="col-sm-4">
+      <input [value]="this.odabraniStudent.prezime" disabled class="form-control" />
+    </div>
+  </div>
+
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Ak godina</th>
+        <th>Godina</th>
+        <th>Obnova</th>
+        <th>
+          Zimski semestar<br />
+          <input value="Upis" disabled /> |
+          <input value="Ovjera" disabled />
+        </th>
+        <th>
+          Ljetni semestar<br />
+          <input value="Upis" disabled /> |
+          <input value="Ovjera" disabled />
+        </th>
+        <th>Evidentirao</th>
+        <th>Akcija</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let x of this.podaciUpis.upisaneAkGodine">
+        <td>{{x.id}}</td>
+        <td>{{x.akGodina}}</td>
+        <td>{{x.godinaStudija}}</td>
+        <td>{{x.obnova}}</td>
+        <td>
+          <input disabled [value]="x.datumUpisZimski" /> |
+          <input disabled [value]="x.datumOvjereZimski" />
+        </td>
+
+        <td>
+          <input value="" /> |
+          <input value="" />
+        </td>
+
+        <td>{{x.evidentiraoKorisnik}}</td>
+        <td>
+          <a class="btn btn-link" (click)="ovjeriZimski(x)"
+            >Ovjeri zimski semestar
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button class="form-label" (click)="NapraviNovi()">Upis u zimski semestar</button>
+</div>
+
+<div
+  class="modal fade show"
+  id="exampleModalLive"
+  tabindex="-1"
+  aria-labelledby="exampleModalLiveLabel"
+  aria-modal="true"
+  role="dialog"
+  style="display: block"
+  *ngIf="this.noviUpis!=null"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLiveLabel">Novi semestar za {{this.odabraniStudent.ime}}</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="noviUpis=null"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Datum</label>
+          <input [(ngModel)]="noviUpis.DatumUpisZimski" class="form-control" type="date" placeholder="Datum" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Godina studija</label>
+          <input [(ngModel)]="noviUpis.godinaStudija" class="form-control" placeholder="Godina studija" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Ak godina</label>
+          <select [(ngModel)]="noviUpis.akademska_godina_id" class="form-control" placeholder="Akg godina">
+            <option *ngFor="let x of podaciAkademskeGodine" [value]="x.id">{{x.opis}}</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">cijenaSkolarine</label>
+          <input class="form-control" placeholder="cijenaSkolarine" />
+        </div>
+
+        <div class="mb-3 form-check">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            placeholder="obnovaGodine"
+            [(ngModel)]="noviUpis.obnova"
+          />
+          <label class="form-check-label">obnovaGodine</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="noviUpis=null">Close</button>
+        <button type="button" class="btn btn-primary" (click)="Upisi()">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade show"
+  tabindex="-1"
+  aria-labelledby="exampleModalLiveLabel"
+  aria-modal="true"
+  role="dialog"
+  style="display: block"
+  *ngIf="this.odabraniOvjera!=null"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" >Ovjera zimskog za {{this.odabraniStudent.ime}}</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="this.odabraniOvjera=null"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Datum</label>
+          <input [(ngModel)]="this.odabraniOvjera.datumOvjereZimski" class="form-control" type="date" placeholder="Datum" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Godina studija</label>
+          <input type="text" [(ngModel)]="this.odabraniOvjera.napomena" class="form-control" placeholder="Napomena" />
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="this.odabraniOvjera=null">Close</button>
+        <button type="button" class="btn btn-primary" (click)="Ovjeri()">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
